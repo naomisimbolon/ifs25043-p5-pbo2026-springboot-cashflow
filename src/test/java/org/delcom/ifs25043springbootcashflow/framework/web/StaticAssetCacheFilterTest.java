@@ -92,13 +92,27 @@ class StaticAssetCacheFilterTest {
         MockHttpServletRequest request = new MockHttpServletRequest("GET",
                 "/cashflow/VAADIN/build/app.js");
         request.setContextPath("/cashflow");
-        request.setRequestURI("/cashflow/other/app.js");
+        request.setRequestURI("/other/app.js");
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         filter.doFilter(request, response,
                 (req, res) -> http(res).setHeader("Cache-Control", "max-age=60"));
 
         assertThat(response.getHeader("Cache-Control")).isEqualTo("max-age=60");
+    }
+
+    @Test
+    void handlesNullContextPath() throws Exception {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        when(request.getRequestURI()).thenReturn("/VAADIN/build/app.js");
+        when(request.getContextPath()).thenReturn(null);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        filter.doFilter(request, response,
+                (req, res) -> http(res).setHeader("Cache-Control", "max-age=60"));
+
+        assertThat(response.getHeader("Cache-Control"))
+                .isEqualTo(StaticAssetCacheFilter.LONG_CACHE_CONTROL);
     }
 
     @Test
