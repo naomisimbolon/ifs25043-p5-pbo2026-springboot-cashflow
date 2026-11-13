@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="description" content="Cashflow adalah aplikasi pencatatan keuangan pribadi: catat pemasukan dan pengeluaran, unggah bukti transaksi, pantau total saldo, dan kelola profil dalam satu tempat." />
+  <meta name="theme-color" content="#2563EB" />
+  <style>
+    html, body, #outlet {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+    }
+
+    body {
+      background: #F3F4F6;
+      color: #111827;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /*
+    Fix app height for iOS home screen apps:
+    - 100% doesn't cover the entire screen
+    - 100vh works on iOS 18 but not on iOS 17 (too tall in Safari)
+    - 100lvh is too tall in Safari, 100svh is too short in standalone apps
+    */
+    @supports (-webkit-touch-callout: none) {
+      @media (display-mode: standalone) {
+        html {
+          height: 100lvh;
+        }
+      }
+    }
+
+    /* Splash screen: paints instantly so first contentful paint is fast. */
+    #splash {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(160deg, #EFF6FF 0%, #F3F4F6 55%, #E5E7EB 100%);
+      transition: opacity 180ms ease-out;
+    }
+
+    #splash.splash--hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #splash .splash__card {
+      text-align: center;
+      padding: 2rem 2.5rem;
+    }
+
+    #splash .splash__logo {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 1rem;
+      border-radius: 18px;
+      background: #2563EB;
+      color: #FFFFFF;
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 64px;
+      letter-spacing: -0.02em;
+      box-shadow: 0 10px 24px rgba(37, 99, 235, 0.28);
+    }
+
+    #splash h1 {
+      margin: 0;
+      font-size: 2.75rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: #111827;
+    }
+
+    #splash p {
+      margin: 0.5rem 0 0;
+      font-size: 1rem;
+      color: #4B5563;
+    }
+  </style>
+  <!-- index.ts is included here automatically (either by the dev server or during the build) -->
+</head>
+<body>
+  <div id="splash" role="status" aria-live="polite">
+    <div class="splash__card">
+      <div class="splash__logo" aria-hidden="true">Rp</div>
+      <h1>Cashflow</h1>
+      <p>Menyiapkan aplikasi&hellip;</p>
+    </div>
+  </div>
+
+  <!-- This outlet div is where the views are rendered -->
+  <div id="outlet"></div>
+
+  <script>
+    (function () {
+      var splash = document.getElementById('splash');
+      var outlet = document.getElementById('outlet');
+      var observer = null;
+      var hidden = false;
+
+      function hideSplash() {
+        if (hidden || !splash) {
+          return;
+        }
+        hidden = true;
+        if (observer) {
+          observer.disconnect();
+          observer = null;
+        }
+        splash.className += ' splash--hidden';
+        window.setTimeout(function () {
+          if (splash && splash.parentNode) {
+            splash.parentNode.removeChild(splash);
+          }
+        }, 250);
+      }
+
+      function appHasRendered() {
+        if (!outlet || !outlet.firstElementChild) {
+          return false;
+        }
+        // Vaadin bootstraps an (initially empty) container inside #outlet and
+        // fills it once the client-side application has rendered a view.
+        return outlet.firstElementChild.children.length > 0;
+      }
+
+      function check() {
+        if (appHasRendered()) {
+          hideSplash();
+        }
+      }
+
+      if (window.MutationObserver) {
+        observer = new MutationObserver(check);
+        observer.observe(document.body, { childList: true, subtree: true });
+      }
+
+      check();
+      window.setTimeout(check, 300);
+      window.setTimeout(check, 1000);
+      // Jangan biarkan splash menutupi pesan error bila aplikasi gagal dimuat.
+      window.setTimeout(hideSplash, 15000);
+    })();
+  </script>
+</body>
+</html>
