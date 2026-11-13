@@ -5,6 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="description" content="Cashflow adalah aplikasi pencatatan keuangan pribadi: catat pemasukan dan pengeluaran, unggah bukti transaksi, pantau total saldo, dan kelola profil dalam satu tempat." />
   <meta name="theme-color" content="#2563EB" />
+  <!--
+  Stylesheet dimuat tanpa memblokir render (media="print" lalu diganti "all"
+  setelah selesai). Splash screen di bawah menutupi aplikasi sampai CSS siap,
+  sehingga tidak ada flash of unstyled content.
+  -->
+  <link rel="stylesheet" href="./lumo/lumo.css" media="print"
+        onload="this.media='all'; window.__vaadinStylesLoaded = (window.__vaadinStylesLoaded || 0) + 1; if (window.__vaadinCheckSplash) window.__vaadinCheckSplash();"
+        onerror="window.__vaadinStylesLoaded = (window.__vaadinStylesLoaded || 0) + 1; if (window.__vaadinCheckSplash) window.__vaadinCheckSplash();" />
+  <link rel="stylesheet" href="./styles.css" media="print"
+        onload="this.media='all'; window.__vaadinStylesLoaded = (window.__vaadinStylesLoaded || 0) + 1; if (window.__vaadinCheckSplash) window.__vaadinCheckSplash();"
+        onerror="window.__vaadinStylesLoaded = (window.__vaadinStylesLoaded || 0) + 1; if (window.__vaadinCheckSplash) window.__vaadinCheckSplash();" />
+  <noscript>
+    <link rel="stylesheet" href="./lumo/lumo.css" />
+    <link rel="stylesheet" href="./styles.css" />
+  </noscript>
   <style>
     html, body, #outlet {
       height: 100%;
@@ -122,20 +137,34 @@
       }
 
       function appHasRendered() {
-        if (!outlet || !outlet.firstElementChild) {
+        if (!outlet) {
           return false;
         }
-        // Vaadin bootstraps an (initially empty) container inside #outlet and
-        // fills it once the client-side application has rendered a view.
-        return outlet.firstElementChild.children.length > 0;
+        // Vaadin menaruh <output> tersembunyi plus satu flow container di
+        // dalam #outlet; container itu terisi setelah view selesai dirender.
+        for (var i = 0; i < outlet.children.length; i++) {
+          if (outlet.children[i].children.length > 0) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      function stylesLoaded() {
+        // Dua stylesheet (lumo.css dan styles.css) menandai selesai dimuat.
+        return (window.__vaadinStylesLoaded || 0) >= 2;
       }
 
       function check() {
-        if (appHasRendered()) {
+        if (appHasRendered() && stylesLoaded()) {
           hideSplash();
         }
       }
 
+      window.__vaadinCheckSplash = check;
+
+      // Jika CSS selesai dimuat sebelum skrip ini berjalan, onload sudah
+      // menaikkan penghitung; panggilan check() di bawah tetap menanganinya.
       if (window.MutationObserver) {
         observer = new MutationObserver(check);
         observer.observe(document.body, { childList: true, subtree: true });
@@ -144,7 +173,7 @@
       check();
       window.setTimeout(check, 300);
       window.setTimeout(check, 1000);
-      // Jangan biarkan splash menutupi pesan error bila aplikasi gagal dimuat.
+      // Jaring pengaman bila salah satu aset gagal dimuat.
       window.setTimeout(hideSplash, 15000);
     })();
   </script>
