@@ -1,12 +1,16 @@
 package org.delcom.ifs25043springbootcashflow.framework.view;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Header;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Main;
+import com.vaadin.flow.component.html.Nav;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -35,6 +39,7 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
     private final Image headerAvatarImage = new Image();
     private final Span headerAvatarInitial = new Span();
     private final Div headerAvatar = new Div();
+    private final Main mainContent = new Main();
 
     private record NavEntry(RouterLink link, String pathPrefix) {
     }
@@ -43,8 +48,21 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
         this.userRepository = userRepository;
         setPrimarySection(Section.DRAWER);
         AuthSession.currentUser(userRepository);
+        mainContent.setSizeFull();
+        setContent(mainContent);
         createHeader();
         createDrawer();
+    }
+
+    /**
+     * Konten halaman dibungkus elemen main agar semua konten berada di dalam landmark (Axe: region).
+     */
+    @Override
+    public void showRouterLayoutContent(HasElement content) {
+        mainContent.removeAll();
+        if (content != null) {
+            mainContent.getElement().appendChild(content.getElement());
+        }
     }
 
     private void createHeader() {
@@ -61,7 +79,9 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
         header.getStyle()
                 .set("background", "#FFFFFF")
                 .set("border-bottom", "1px solid #E5E7EB");
-        addToNavbar(header);
+        Header banner = new Header(header);
+        banner.setWidthFull();
+        addToNavbar(banner);
     }
 
     private HorizontalLayout appBrandTitle(String fontSize, String iconSize) {
@@ -252,7 +272,10 @@ public class MainLayout extends AppLayout implements BeforeEnterObserver, AfterN
 
         drawer.add(brand, menu);
         drawer.expand(menu);
-        addToDrawer(drawer);
+        Nav navigation = new Nav(drawer);
+        navigation.getElement().setAttribute("aria-label", "Navigasi utama");
+        navigation.setSizeFull();
+        addToDrawer(navigation);
     }
 
     private RouterLink navItem(

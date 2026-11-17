@@ -1,5 +1,6 @@
 package org.delcom.ifs25043springbootcashflow;
 
+import com.vaadin.flow.server.AppShellSettings;
 import org.delcom.ifs25043springbootcashflow.adapter.presenter.FinancePresenter;
 import org.delcom.ifs25043springbootcashflow.adapter.storage.FileStorage;
 import org.delcom.ifs25043springbootcashflow.domain.repository.ITransactionRepository;
@@ -20,6 +21,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -73,5 +75,14 @@ class AppTest {
                     any(String[].class)
             ));
         }
+    }
+
+    @Test
+    void configurePageSetsInitialTitle() {
+        AppShellSettings settings = mock(AppShellSettings.class);
+
+        new App().configurePage(settings);
+
+        verify(settings).setPageTitle("Cashflow");
     }
 }

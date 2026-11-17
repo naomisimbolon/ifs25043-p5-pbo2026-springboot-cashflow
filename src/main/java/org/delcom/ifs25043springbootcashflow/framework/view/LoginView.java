@@ -6,6 +6,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
@@ -25,7 +26,7 @@ import org.delcom.ifs25043springbootcashflow.usecase.AuthUseCase;
 
 @Route("login")
 @PageTitle("Login")
-public class LoginView extends VerticalLayout {
+public class LoginView extends Main {
 
     public LoginView(AuthUseCase authUseCase, IUserRepository userRepository) {
         if (AuthSession.currentUser(userRepository).isPresent()) {
@@ -34,9 +35,14 @@ public class LoginView extends VerticalLayout {
         }
 
         setSizeFull();
-        setJustifyContentMode(JustifyContentMode.CENTER);
-        setAlignItems(Alignment.CENTER);
-        getStyle().set("background", "#F3F4F6");
+        getStyle()
+                .set("display", "flex")
+                .set("flex-direction", "column")
+                .set("justify-content", "center")
+                .set("align-items", "center")
+                .set("box-sizing", "border-box")
+                .set("padding", "1rem")
+                .set("background", "#F3F4F6");
 
         TextField username = new TextField("Username");
         PasswordField password = new PasswordField("Password");
